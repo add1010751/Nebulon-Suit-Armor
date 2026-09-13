@@ -515,12 +515,23 @@ function weightedRandom(excluded = []) {
 }
 
 function getScore(name, value) {
+    // 1. 找出該屬性在計分表中的所有設定
     let candidates = scoreTable.filter(s => s[0] === name);
     if (candidates.length === 0) return 0;
-    let closest = candidates.reduce((prev, curr) => {
-        return Math.abs(curr[1] - value) < Math.abs(prev[1] - value) ? curr : prev;
+    
+    // 2. 篩選出「當前抽到的數值」有達到門檻的規則
+    // 註：- 0.0001 是為了防止 JavaScript 浮點數計算誤差導致 0.2 不等於 0.2 的問題
+    let validCandidates = candidates.filter(s => value >= s[1] - 0.0001);
+    
+    // 如果抽到的數值沒有達到任何門檻，就給 0 分
+    if (validCandidates.length === 0) return 0;
+
+    // 3. 如果您有設定多個門檻（例如 0.1給1分、0.2給2分），則取符合條件中最高分的那一個
+    let bestMatch = validCandidates.reduce((prev, curr) => {
+        return (curr[1] > prev[1]) ? curr : prev;
     });
-    return closest[2];
+    
+    return bestMatch[2];
 }
 
 function formatOptionDisplay(name, value) {
@@ -587,7 +598,7 @@ function getRandomOptions() {
 }
 
 // 核心邏輯 - 依據填寫的目標分數進行搜尋
-/*function findCustomTargetOptions() {
+function findCustomTargetOptions() {
     let targetScore = parseFloat(document.getElementById('target-score').value) ;
     clickCount = 0;
     let localSearchCount = 0;
@@ -630,7 +641,7 @@ function getRandomOptions() {
             break;
         }
     }
-}*/
+}
 
 function resetSimulation() {
     clickCount = 0;
