@@ -15,7 +15,7 @@
         --accent-color: #ffd700;
         --text-main: #e0e0e0;
         --text-sub: #a0a0b0;
-        --max-stat-color: #d3ab82; /* 已更改為指定的最高素質顏色 */
+        --max-stat-color: #d3ab82; 
         --min-stat-color: #757575;
     }
 
@@ -77,7 +77,7 @@
     .item-info h2 {
         margin: 0;
         font-size: 1.2rem;
-        color: #f16605; /* 已更改為指定的文字顏色 */
+        color: #f16605; 
     }
 
     .item-info span {
@@ -240,7 +240,7 @@
     }
     .settings-row input:focus { outline: none; border-bottom-color: var(--accent-color); }
 	
-    /* 統計標題區塊 (新增) */
+    /* 統計標題區塊 */
     .stats-header {
         display: flex;
         align-items: center;
@@ -250,9 +250,9 @@
         border-bottom: 1px dashed var(--border-color);
     }
     
-    /* 統計標題文字 (新增螢光綠) */
+    /* 統計標題文字 */
     .stats-title {
-        color: #39ff14; /* 螢光綠色 */
+        color: #39ff14; 
         font-weight: bold;
         font-size: 1.1rem;
         text-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
@@ -339,7 +339,7 @@
         <div class="stats-card">
             
             <!-- 統計圖片位置-->
-			 <div class="stats-header">
+             <div class="stats-header">
                 <div class="stats-image-placeholder">
                     <img src="https://raw.githubusercontent.com/add1010751/Nebulon-Suit-Armor/refs/heads/main/%E9%98%B2%E5%85%B7%E5%B1%AC%E6%80%A7%E8%AE%8A%E6%8F%9B%E7%9F%B3.webp" alt="統計圖片">
                 </div>
@@ -508,9 +508,22 @@ function formatOptionDisplay(name, value) {
 
 function generateSlotData(index) {
     let opt = options[index];
-    let val = Math.random() * (opt[2] - opt[1]) + opt[1];
+    let val;
     
-    val = opt[3] ? parseFloat(val.toFixed(2)) : parseFloat(val.toFixed(1));
+    if (opt[0].startsWith("防具強化數值每1")) {
+        // 第一類極品素質：從指定的 10 個數值中完全隨機抽取 (機率各 10%)
+        const possibleValues = [0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20];
+        val = possibleValues[Math.floor(Math.random() * possibleValues.length)];
+    } else {
+        // 其他一般素質：利用整數計算來確保每個區段 (例如 0.1~1.0 或 0.3~1.2) 機率均等
+        let minInt = Math.round(opt[1] * 10);
+        let maxInt = Math.round(opt[2] * 10);
+        let range = maxInt - minInt + 1;
+        
+        // 取得均等的隨機整數後，再轉回小數 (機率各為 1/range)
+        let randomInt = Math.floor(Math.random() * range) + minInt;
+        val = randomInt / 10;
+    }
     
     let score = getScore(opt[0], val);
     return { opt, val, score };
