@@ -165,7 +165,7 @@
         border: 1px solid var(--border-color);
     }
 
- /* 統計圖片佔位 */
+    /* 統計圖片佔位 */
     .stats-image-placeholder {
         width: 48px;
         height: 48px;
@@ -304,6 +304,25 @@
         border-color: #666;
     }
 
+    /* 底部連結區塊 */
+    .footer-links {
+        margin-top: 25px;
+        text-align: center;
+        width: 100%;
+    }
+
+    .footer-links a {
+        color: #666;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+        color: #a0a0b0;
+        text-decoration: underline;
+    }
+
     /* RWD */
     @media (max-width: 768px) {
         .container { grid-template-columns: 1fr; }
@@ -388,6 +407,11 @@
     </div>
 </div>
 
+<!-- 底部來源超連結 -->
+<div class="footer-links">
+    <a href="https://m.elsword.nexon.com/news/probability/354" target="_blank" rel="noopener noreferrer">機率來源</a>
+</div>
+
 <script>
 let hkdToTwdRate = 4.1;
 
@@ -434,7 +458,7 @@ const options = [
     ["所有技能傷害增加", 0.1, 1, false, 6.5],
     ["致命一擊", 0.3, 1.2, false, 6.5],
     ["極大化", 0.3, 1.2, false, 6.5],
-    ["無視敵人物理/魔法防禦力", 0.3, 1.2, false, 6.5],
+    ["無視敵人物理/魔法防禦力", 0.1, 1, false, 6.5],
     ["對一般怪物造成的傷害增加", 0.3, 1.2, false, 6.5],
     ["輔助職業恢復技能HP/MP效益增加", 0.3, 1.2, false, 6.5]
 ];
@@ -515,12 +539,12 @@ function generateSlotData(index) {
         const possibleValues = [0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20];
         val = possibleValues[Math.floor(Math.random() * possibleValues.length)];
     } else {
-        // 其他一般素質：利用整數計算來確保每個區段 (例如 0.1~1.0 或 0.3~1.2) 機率均等
+        // 其他一般素質：利用整數計算來確保每個區段機率均等
         let minInt = Math.round(opt[1] * 10);
         let maxInt = Math.round(opt[2] * 10);
         let range = maxInt - minInt + 1;
         
-        // 取得均等的隨機整數後，再轉回小數 (機率各為 1/range)
+        // 取得均等的隨機整數後，再轉回小數
         let randomInt = Math.floor(Math.random() * range) + minInt;
         val = randomInt / 10;
     }
