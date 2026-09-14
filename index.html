@@ -304,6 +304,94 @@
         border-color: #666;
     }
 
+    /* 新增：伸縮式選單樣式 */
+    .score-accordion-panel {
+        width: 100%;
+        max-width: 900px;
+        margin-top: 20px;
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+
+    .accordion-toggle-btn {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-main);
+        padding: 14px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 0;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .accordion-toggle-btn:hover {
+        background: rgba(0, 229, 255, 0.1);
+        color: var(--primary-color);
+    }
+
+    .accordion-content {
+        display: none;
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.25);
+        border-top: 1px solid var(--border-color);
+        max-height: 450px;
+        overflow-y: auto;
+    }
+
+    .score-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 15px;
+    }
+
+    .score-card {
+        background: var(--slot-bg);
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+    }
+
+    .score-card-header {
+        color: var(--primary-color);
+        font-size: 0.95rem;
+        font-weight: bold;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+        padding-bottom: 8px;
+        margin-bottom: 10px;
+    }
+
+    .score-card-rules {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .score-rule-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: var(--text-sub);
+    }
+
+    .score-rule-val {
+        color: #fff;
+    }
+
+    .score-rule-pts {
+        color: var(--accent-color);
+        font-weight: bold;
+        font-family: 'Consolas', monospace;
+    }
+
     /* 底部連結區塊 */
     .footer-links {
         margin-top: 25px;
@@ -327,6 +415,7 @@
     @media (max-width: 768px) {
         .container { grid-template-columns: 1fr; }
         .weapon-panel { min-height: auto; }
+        .score-cards-grid { grid-template-columns: 1fr; }
     }
 </style>
 </head>
@@ -407,6 +496,19 @@
     </div>
 </div>
 
+<!-- 新增：評分規則伸縮式選單 -->
+<div class="score-accordion-panel">
+    <button class="accordion-toggle-btn" onclick="toggleScoreMenu()">
+        <span>各屬性評分標準明細</span>
+        <span id="accordion-arrow">▼</span>
+    </button>
+    <div id="accordion-content" class="accordion-content">
+        <div id="score-cards-container" class="score-cards-grid">
+            <!-- 評分規則將由 JavaScript 動態生成 -->
+        </div>
+    </div>
+</div>
+
 <!-- 底部來源超連結 -->
 <div class="footer-links">
     <a href="https://m.elsword.nexon.com/news/probability/354" target="_blank" rel="noopener noreferrer">機率來源</a>
@@ -438,6 +540,7 @@ async function fetchExchangeRate() {
 
 window.onload = function() {
     fetchExchangeRate();
+    renderScoreRulesUI(); // 頁面載入時自動渲染評分表
 };
 
 let clickCount = 0;
@@ -465,114 +568,102 @@ const options = [
 
 const scoreTable = [
     ["防具強化數值每1，物理/魔法攻擊力", 0.2, 15],
-	["防具強化數值每1，物理/魔法攻擊力", 0.18, 14],
-	["防具強化數值每1，物理/魔法攻擊力", 0.16, 13.5],
-	["防具強化數值每1，物理/魔法攻擊力", 0.14, 10],
-	["防具強化數值每1，物理/魔法攻擊力", 0.12, 9],
-	["防具強化數值每1，物理/魔法攻擊力", 0.1, 7.5],
-	["防具強化數值每1，物理/魔法攻擊力", 0.08, 6.5],
-	["防具強化數值每1，物理/魔法攻擊力", 0.06, 5],
-	["防具強化數值每1，物理/魔法攻擊力", 0.04, 3],
-	
-	
+    ["防具強化數值每1，物理/魔法攻擊力", 0.18, 14],
+    ["防具強化數值每1，物理/魔法攻擊力", 0.16, 13.5],
+    ["防具強化數值每1，物理/魔法攻擊力", 0.14, 10],
+    ["防具強化數值每1，物理/魔法攻擊力", 0.12, 9],
+    ["防具強化數值每1，物理/魔法攻擊力", 0.1, 7.5],
+    ["防具強化數值每1，物理/魔法攻擊力", 0.08, 6.5],
+    ["防具強化數值每1，物理/魔法攻擊力", 0.06, 5],
+    ["防具強化數值每1，物理/魔法攻擊力", 0.04, 3],
+    
     ["防具強化數值每1，致命一擊傷害", 0.2, 13],
-	["防具強化數值每1，致命一擊傷害", 0.18, 12],
-	["防具強化數值每1，致命一擊傷害", 0.16, 10.5],
-	["防具強化數值每1，致命一擊傷害", 0.14, 8.5],
-	["防具強化數值每1，致命一擊傷害", 0.12, 7.5],
-	["防具強化數值每1，致命一擊傷害", 0.1, 6.5],
-	["防具強化數值每1，致命一擊傷害", 0.08, 5.5],
-	["防具強化數值每1，致命一擊傷害", 0.06, 4],
-	["防具強化數值每1，致命一擊傷害", 0.04, 2],
-	
-	
+    ["防具強化數值每1，致命一擊傷害", 0.18, 12],
+    ["防具強化數值每1，致命一擊傷害", 0.16, 10.5],
+    ["防具強化數值每1，致命一擊傷害", 0.14, 8.5],
+    ["防具強化數值每1，致命一擊傷害", 0.12, 7.5],
+    ["防具強化數值每1，致命一擊傷害", 0.1, 6.5],
+    ["防具強化數值每1，致命一擊傷害", 0.08, 5.5],
+    ["防具強化數值每1，致命一擊傷害", 0.06, 4],
+    ["防具強化數值每1，致命一擊傷害", 0.04, 2],
+    
     ["防具強化數值每1，所有技能傷害", 0.2, 14],
-	["防具強化數值每1，所有技能傷害", 0.18, 13],
-	["防具強化數值每1，所有技能傷害", 0.16, 11.5],
-	["防具強化數值每1，所有技能傷害", 0.14, 9.5],
-	["防具強化數值每1，所有技能傷害", 0.12, 8],
-	["防具強化數值每1，所有技能傷害", 0.1, 7],
-	["防具強化數值每1，所有技能傷害", 0.08, 6],
-	["防具強化數值每1，所有技能傷害", 0.06, 4.5],
-	["防具強化數值每1，所有技能傷害", 0.04, 2.5],
-	
-	
+    ["防具強化數值每1，所有技能傷害", 0.18, 13],
+    ["防具強化數值每1，所有技能傷害", 0.16, 11.5],
+    ["防具強化數值每1，所有技能傷害", 0.14, 9.5],
+    ["防具強化數值每1，所有技能傷害", 0.12, 8],
+    ["防具強化數值每1，所有技能傷害", 0.1, 7],
+    ["防具強化數值每1，所有技能傷害", 0.08, 6],
+    ["防具強化數值每1，所有技能傷害", 0.06, 4.5],
+    ["防具強化數值每1，所有技能傷害", 0.04, 2.5],
+    
     ["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 1, 9],
-	["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.9, 8],
-	["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.8, 7],
-	["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.7, 6],
-	["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.6, 4.5],
-	["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.5, 3.5],
-	["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.4, 2],
-	
-	
+    ["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.9, 8],
+    ["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.8, 7],
+    ["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.7, 6],
+    ["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.6, 4.5],
+    ["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.5, 3.5],
+    ["根據攻擊時給予的傷害量的n%，在3秒內給予持續傷害", 0.4, 2],
+    
     ["物理/魔法攻擊力", 1, 7],
-	["物理/魔法攻擊力", 0.9, 6.5],
-	["物理/魔法攻擊力", 0.8, 6],
-	["物理/魔法攻擊力", 0.7, 5],
-	["物理/魔法攻擊力", 0.6, 5],
-	["物理/魔法攻擊力", 0.5, 4],
-	["物理/魔法攻擊力", 0.4, 2.5],
-	
-	["攻擊體力100%以下的敵人時，傷害增加", 1, 9.5],
-	["攻擊體力100%以下的敵人時，傷害增加", 0.9, 9],
-	["攻擊體力100%以下的敵人時，傷害增加", 0.8, 8.5],
-	["攻擊體力100%以下的敵人時，傷害增加", 0.7, 7.5],
-	["攻擊體力100%以下的敵人時，傷害增加", 0.6, 6.5],
-	["攻擊體力100%以下的敵人時，傷害增加", 0.5, 4.5],
-	["攻擊體力100%以下的敵人時，傷害增加", 0.4, 3.5],
-	
+    ["物理/魔法攻擊力", 0.9, 6.5],
+    ["物理/魔法攻擊力", 0.8, 6],
+    ["物理/魔法攻擊力", 0.7, 5],
+    ["物理/魔法攻擊力", 0.6, 5],
+    ["物理/魔法攻擊力", 0.5, 4],
+    ["物理/魔法攻擊力", 0.4, 2.5],
+    
+    ["攻擊體力100%以下的敵人時，傷害增加", 1, 9.5],
+    ["攻擊體力100%以下的敵人時，傷害增加", 0.9, 9],
+    ["攻擊體力100%以下的敵人時，傷害增加", 0.8, 8.5],
+    ["攻擊體力100%以下的敵人時，傷害增加", 0.7, 7.5],
+    ["攻擊體力100%以下的敵人時，傷害增加", 0.6, 6.5],
+    ["攻擊體力100%以下的敵人時，傷害增加", 0.5, 4.5],
+    ["攻擊體力100%以下的敵人時，傷害增加", 0.4, 3.5],
+    
     ["兩極化：攻擊/被擊傷害", 1, 9],
-	["兩極化：攻擊/被擊傷害", 0.9, 8],
-	["兩極化：攻擊/被擊傷害", 0.8, 7],
-	["兩極化：攻擊/被擊傷害", 0.7, 6],
-	["兩極化：攻擊/被擊傷害", 0.6, 4.5],
-	["兩極化：攻擊/被擊傷害", 0.5, 3.5],
-	["兩極化：攻擊/被擊傷害", 0.4, 2.5],
-	
+    ["兩極化：攻擊/被擊傷害", 0.9, 8],
+    ["兩極化：攻擊/被擊傷害", 0.8, 7],
+    ["兩極化：攻擊/被擊傷害", 0.7, 6],
+    ["兩極化：攻擊/被擊傷害", 0.6, 4.5],
+    ["兩極化：攻擊/被擊傷害", 0.5, 3.5],
+    ["兩極化：攻擊/被擊傷害", 0.4, 2.5],
+    
     ["致命一擊傷害", 1, 6.5],
-	["致命一擊傷害", 0.9, 5.5],
-	["致命一擊傷害", 0.8, 5],
-	["致命一擊傷害", 0.7, 4.5],
-	["致命一擊傷害", 0.6, 3],
-	["致命一擊傷害", 0.5, 2],
-	
+    ["致命一擊傷害", 0.9, 5.5],
+    ["致命一擊傷害", 0.8, 5],
+    ["致命一擊傷害", 0.7, 4.5],
+    ["致命一擊傷害", 0.6, 3],
+    ["致命一擊傷害", 0.5, 2],
+    
     ["給予Boss傷害增加", 1, 5.5],
-	["給予Boss傷害增加", 0.9, 5],
-	["給予Boss傷害增加", 0.8, 4.5],
-	["給予Boss傷害增加", 0.7, 4],
-	["給予Boss傷害增加", 0.6, 3],
-	["給予Boss傷害增加", 0.5, 2],
-	
-    ["強韌技能傷害增加", 1, 0],
-	
-	["強烈技能傷害增加", 1, 6.5],
-	["強烈技能傷害增加", 0.9, 5.5],
-	["強烈技能傷害增加", 0.8, 5],
-	["強烈技能傷害增加", 0.7, 4.5],
-	["強烈技能傷害增加", 0.6, 3],
-	["強烈技能傷害增加", 0.5, 2],
-	
-	["超越技能傷害增加", 1, 6.5],
-	["超越技能傷害增加", 0.9, 5.5],
-	["超越技能傷害增加", 0.8, 5],
-	["超越技能傷害增加", 0.7, 4.5],
-	["超越技能傷害增加", 0.6, 3],
-	["超越技能傷害增加", 0.5, 2],
+    ["給予Boss傷害增加", 0.9, 5],
+    ["給予Boss傷害增加", 0.8, 4.5],
+    ["給予Boss傷害增加", 0.7, 4],
+    ["給予Boss傷害增加", 0.6, 3],
+    ["給予Boss傷害增加", 0.5, 2],
+    
+    ["強烈技能傷害增加", 1, 6.5],
+    ["強烈技能傷害增加", 0.9, 5.5],
+    ["強烈技能傷害增加", 0.8, 5],
+    ["強烈技能傷害增加", 0.7, 4.5],
+    ["強烈技能傷害增加", 0.6, 3],
+    ["強烈技能傷害增加", 0.5, 2],
+    
+    ["超越技能傷害增加", 1, 6.5],
+    ["超越技能傷害增加", 0.9, 5.5],
+    ["超越技能傷害增加", 0.8, 5],
+    ["超越技能傷害增加", 0.7, 4.5],
+    ["超越技能傷害增加", 0.6, 3],
+    ["超越技能傷害增加", 0.5, 2],
 
     ["所有技能傷害增加", 1, 6.5],
-	["所有技能傷害增加", 0.9, 6],
-	["所有技能傷害增加", 0.8, 5],
-	["所有技能傷害增加", 0.7, 4.5],
-	["所有技能傷害增加", 0.6, 3.5],
-	["所有技能傷害增加", 0.5, 2.5],
-	
-	
-    ["致命一擊", 1.2, 0],
-    ["極大化", 1.2, 0],
-    ["無視敵人物理/魔法防禦力", 1, 0],
-    ["對一般怪物造成的傷害增加", 1, 0],
-    ["輔助職業恢復技能HP/MP效益增加", 1, 0],
+    ["所有技能傷害增加", 0.9, 6],
+    ["所有技能傷害增加", 0.8, 5],
+    ["所有技能傷害增加", 0.7, 4.5],
+    ["所有技能傷害增加", 0.6, 3.5],
+    ["所有技能傷害增加", 0.5, 2.5],
+
 ];
 
 function wrapAction(action) {
@@ -585,7 +676,6 @@ function updateStatsUI(count, score) {
     document.getElementById('click-count').textContent = count;
     document.getElementById('total-score').textContent = score.toFixed(1);
     
-    // 改為固定 29NT 計算
     const twd = count * 29; 
     document.getElementById('ed-twd').textContent = Math.round(twd).toLocaleString();
 
@@ -606,18 +696,12 @@ function weightedRandom(excluded = []) {
 }
 
 function getScore(name, value) {
-    // 1. 找出該屬性在計分表中的所有設定
     let candidates = scoreTable.filter(s => s[0] === name);
     if (candidates.length === 0) return 0;
     
-    // 2. 篩選出「當前抽到的數值」有達到門檻的規則
-    // 註：- 0.0001 是為了防止 JavaScript 浮點數計算誤差導致 0.2 不等於 0.2 的問題
     let validCandidates = candidates.filter(s => value >= s[1] - 0.0001);
-    
-    // 如果抽到的數值沒有達到任何門檻，就給 0 分
     if (validCandidates.length === 0) return 0;
 
-    // 3. 如果您有設定多個門檻（例如 0.1給1分、0.2給2分），則取符合條件中最高分的那一個
     let bestMatch = validCandidates.reduce((prev, curr) => {
         return (curr[1] > prev[1]) ? curr : prev;
     });
@@ -637,16 +721,13 @@ function generateSlotData(index) {
     let val;
     
     if (opt[0].startsWith("防具強化數值每1")) {
-        // 第一類極品素質：從指定的 10 個數值中完全隨機抽取 (機率各 10%)
         const possibleValues = [0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16, 0.18, 0.20];
         val = possibleValues[Math.floor(Math.random() * possibleValues.length)];
     } else {
-        // 其他一般素質：利用整數計算來確保每個區段機率均等
         let minInt = Math.round(opt[1] * 10);
         let maxInt = Math.round(opt[2] * 10);
         let range = maxInt - minInt + 1;
         
-        // 取得均等的隨機整數後，再轉回小數
         let randomInt = Math.floor(Math.random() * range) + minInt;
         val = randomInt / 10;
     }
@@ -688,7 +769,6 @@ function getRandomOptions() {
     updateStatsUI(clickCount, totalScore);
 }
 
-// 核心邏輯 - 依據填寫的目標分數進行搜尋
 function findCustomTargetOptions() {
     let targetScore = parseFloat(document.getElementById('target-score').value) ;
     clickCount = 0;
@@ -744,6 +824,54 @@ function resetSimulation() {
         <div class="option-slot"><span style="color:var(--text-sub)">尚未鑑定</span></div>
         <div class="option-slot"><span style="color:var(--text-sub)">尚未鑑定</span></div>
     `;
+}
+
+/* 新增：切換選單展開/收合狀態 */
+function toggleScoreMenu() {
+    const content = document.getElementById('accordion-content');
+    const arrow = document.getElementById('accordion-arrow');
+    if (content.style.display === 'block') {
+        content.style.display = 'none';
+        arrow.textContent = '▼';
+    } else {
+        content.style.display = 'block';
+        arrow.textContent = '▲';
+    }
+}
+
+/* 新增：依據 scoreTable 自動建構分數卡片清單 */
+function renderScoreRulesUI() {
+    const container = document.getElementById('score-cards-container');
+    if (!container) return;
+
+    // 將 scoreTable 依屬性名稱進行分組
+    const grouped = {};
+    scoreTable.forEach(([name, val, score]) => {
+        if (!grouped[name]) grouped[name] = [];
+        grouped[name].push({ val, score });
+    });
+
+    let html = '';
+    for (const [name, rules] of Object.entries(grouped)) {
+        // 依照門檻數值高至低排序
+        rules.sort((a, b) => b.val - a.val);
+
+        let rulesHTML = rules.map(r => `
+            <div class="score-rule-item">
+                <span class="score-rule-val"> ${r.val}${name.includes("持續傷害") ? "%" : "%"}</span>
+                <span class="score-rule-pts">${r.score} 分</span>
+            </div>
+        `).join('');
+
+        html += `
+            <div class="score-card">
+                <div class="score-card-header">${name}</div>
+                <div class="score-card-rules">${rulesHTML}</div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
 }
 </script>
 </body>
