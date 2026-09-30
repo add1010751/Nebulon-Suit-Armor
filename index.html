@@ -304,7 +304,7 @@
         border-color: #666;
     }
 
-    /* 新增：伸縮式選單樣式 */
+    /* 伸縮式選單通用樣式 */
     .score-accordion-panel {
         width: 100%;
         max-width: 900px;
@@ -337,13 +337,12 @@
         color: var(--primary-color);
     }
 
+    /* 預設關閉（隱藏內容） */
     .accordion-content {
         display: none;
         padding: 20px;
         background: rgba(0, 0, 0, 0.25);
         border-top: 1px solid var(--border-color);
-        max-height: 450px;
-        overflow-y: auto;
     }
 
     .score-cards-grid {
@@ -392,6 +391,104 @@
         font-family: 'Consolas', monospace;
     }
 
+    /* --- 計算機專屬樣式 --- */
+    .calc-score-board {
+        background: linear-gradient(180deg, rgba(30,30,38,0.9) 0%, rgba(20,20,25,0.9) 100%);
+        border: 1px solid var(--primary-color);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+        border-radius: 12px;
+        padding: 15px 30px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .calc-score-label {
+        font-size: 0.85rem;
+        color: var(--primary-color);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+    }
+
+    #calc-total {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1;
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    }
+
+    #calc-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 15px;
+        width: 100%;
+    }
+
+    .calc-option-card {
+        background: var(--slot-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .calc-option-card:hover {
+        border-color: #555;
+    }
+
+    .calc-option-card.active {
+        border-color: var(--primary-color);
+        background-color: rgba(0, 229, 255, 0.05);
+    }
+
+    .calc-option-label {
+        font-size: 0.9rem;
+        color: var(--text-sub);
+        margin-bottom: 8px;
+        font-weight: 500;
+        line-height: 1.3;
+    }
+
+    .calc-select-wrapper {
+        position: relative;
+    }
+
+    .calc-select-wrapper select {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 0.9rem;
+        background-color: var(--bg-color);
+        color: #fff;
+        border: 1px solid #444;
+        border-radius: 6px;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        transition: border-color 0.2s;
+    }
+
+    .calc-select-wrapper select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .calc-select-wrapper::after {
+        content: '▼';
+        font-size: 0.7rem;
+        color: #888;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
     /* 底部連結區塊 */
     .footer-links {
         margin-top: 25px;
@@ -415,7 +512,7 @@
     @media (max-width: 768px) {
         .container { grid-template-columns: 1fr; }
         .weapon-panel { min-height: auto; }
-        .score-cards-grid { grid-template-columns: 1fr; }
+        .score-cards-grid, #calc-options { grid-template-columns: 1fr; }
     }
 </style>
 </head>
@@ -445,8 +542,6 @@
 
     <div class="control-panel">
         <div class="stats-card">
-            
-            <!-- 統計圖片位置-->
              <div class="stats-header">
                 <div class="stats-image-placeholder">
                     <img src="https://raw.githubusercontent.com/add1010751/Nebulon-Suit-Armor/refs/heads/main/%E9%98%B2%E5%85%B7%E5%B1%AC%E6%80%A7%E8%AE%8A%E6%8F%9B%E7%9F%B3.webp" alt="統計圖片">
@@ -458,7 +553,6 @@
                 <span class="stat-label">變換次數</span>
                 <span id="click-count" class="stat-value">0</span>
             </div>
-            <!-- 移除ED計算，改為固定台幣 -->
             <div class="stat-row">
                 <span class="stat-label">台幣估算 (單次29NT)</span>
                 <span class="stat-value highlight">NT$ <span id="ed-twd">0</span></span>
@@ -473,7 +567,6 @@
                 <span class="stat-value">HK$ <span id="ed-hkd">0</span></span>
             </div>
 
-            <!-- 改為自訂分數設定區 -->
             <div class="settings-row">
                 <span>目標分數</span>
                 <div>
@@ -496,7 +589,7 @@
     </div>
 </div>
 
-<!-- 新增：評分規則伸縮式選單 -->
+<!-- 選項 1：屬性評分明細（預設關閉） -->
 <div class="score-accordion-panel">
     <button class="accordion-toggle-btn" onclick="toggleScoreMenu()">
         <span>屬性評分明細 ※隨意打的分-僅供參考</span>
@@ -504,7 +597,31 @@
     </button>
     <div id="accordion-content" class="accordion-content">
         <div id="score-cards-container" class="score-cards-grid">
-            <!-- 評分規則將由 JavaScript 動態生成 -->
+            <!-- 評分規則由 JavaScript 動態生成 -->
+        </div>
+    </div>
+</div>
+
+<!-- 選項 2：屬性評分計算器（預設關閉） -->
+<div class="score-accordion-panel" style="margin-top: 15px;">
+    <button class="accordion-toggle-btn" onclick="toggleCalcMenu()">
+        <span>屬性評分手動計算機</span>
+        <span id="calc-accordion-arrow">▼</span>
+    </button>
+    <div id="calc-accordion-content" class="accordion-content">
+        <div class="calc-score-board">
+            <div class="calc-score-label">計算機總分 (Total Score)</div>
+            <div id="calc-total">0.0</div>
+        </div>
+        
+        <div id="calc-options">
+            <!-- 下拉選單卡片將由 JavaScript 動態生成 -->
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button class="btn-reset" id="calcResetBtn" style="margin-top: 0; padding: 10px 24px;">
+                ↺ 重置屬性計算器
+            </button>
         </div>
     </div>
 </div>
@@ -541,6 +658,7 @@ async function fetchExchangeRate() {
 window.onload = function() {
     fetchExchangeRate();
     renderScoreRulesUI(); // 頁面載入時自動渲染評分表
+    initCalc();           // 頁面載入時初始化防具屬性計算器
 };
 
 let clickCount = 0;
@@ -566,6 +684,7 @@ const options = [
     ["輔助職業恢復技能HP/MP效益增加", 0.3, 1.2, false, 6.5]
 ];
 
+// 原防具 scoreTable 數據
 const scoreTable = [
     ["防具強化數值每1，物理/魔法攻擊力", 0.2, 15],
     ["防具強化數值每1，物理/魔法攻擊力", 0.18, 14],
@@ -662,8 +781,7 @@ const scoreTable = [
     ["所有技能傷害增加", 0.8, 5],
     ["所有技能傷害增加", 0.7, 4.5],
     ["所有技能傷害增加", 0.6, 3.5],
-    ["所有技能傷害增加", 0.5, 2.5],
-
+    ["所有技能傷害增加", 0.5, 2.5]
 ];
 
 function wrapAction(action) {
@@ -826,7 +944,7 @@ function resetSimulation() {
     `;
 }
 
-/* 新增：切換選單展開/收合狀態 */
+/* 切換選單 1 展開/收合狀態 */
 function toggleScoreMenu() {
     const content = document.getElementById('accordion-content');
     const arrow = document.getElementById('accordion-arrow');
@@ -839,12 +957,11 @@ function toggleScoreMenu() {
     }
 }
 
-/* 新增：依據 scoreTable 自動建構分數卡片清單 */
+/* 依據 scoreTable 自動建構分數卡片清單 */
 function renderScoreRulesUI() {
     const container = document.getElementById('score-cards-container');
     if (!container) return;
 
-    // 將 scoreTable 依屬性名稱進行分組
     const grouped = {};
     scoreTable.forEach(([name, val, score]) => {
         if (!grouped[name]) grouped[name] = [];
@@ -853,12 +970,11 @@ function renderScoreRulesUI() {
 
     let html = '';
     for (const [name, rules] of Object.entries(grouped)) {
-        // 依照門檻數值高至低排序
         rules.sort((a, b) => b.val - a.val);
 
         let rulesHTML = rules.map(r => `
             <div class="score-rule-item">
-                <span class="score-rule-val"> ${r.val}${name.includes("持續傷害") ? "%" : "%"}</span>
+                <span class="score-rule-val">${r.val}%</span>
                 <span class="score-rule-pts">${r.score} 分</span>
             </div>
         `).join('');
@@ -872,6 +988,99 @@ function renderScoreRulesUI() {
     }
 
     container.innerHTML = html;
+}
+
+/* 切換選單 2 (計算機) 展開/收合狀態 */
+function toggleCalcMenu() {
+    const content = document.getElementById('calc-accordion-content');
+    const arrow = document.getElementById('calc-accordion-arrow');
+    if (content.style.display === 'block') {
+        content.style.display = 'none';
+        arrow.textContent = '▼';
+    } else {
+        content.style.display = 'block';
+        arrow.textContent = '▲';
+    }
+}
+
+/* 直接讀取原本的 scoreTable (防具數據) 來初始化計算機選項 */
+function initCalc() {
+    const grouped = {};
+    scoreTable.forEach(([name, value, score]) => {
+        if (!grouped[name]) grouped[name] = [];
+        grouped[name].push({ value, score });
+    });
+
+    const container = document.getElementById("calc-options");
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    Object.keys(grouped).forEach((name) => {
+        const card = document.createElement("div");
+        card.className = "calc-option-card";
+
+        const label = document.createElement("label");
+        label.className = "calc-option-label";
+        label.textContent = name;
+        
+        const selectWrapper = document.createElement("div");
+        selectWrapper.className = "calc-select-wrapper";
+
+        const select = document.createElement("select");
+        select.className = "calc-select";
+        
+        const emptyOpt = document.createElement("option");
+        emptyOpt.value = "";
+        emptyOpt.textContent = "請選擇數值...";
+        select.appendChild(emptyOpt);
+
+        // 依數值由大到小排序
+        grouped[name].sort((a, b) => b.value - a.value);
+
+        grouped[name].forEach(entry => {
+            const opt = document.createElement("option");
+            opt.value = entry.score;
+            let unit = name.startsWith("防具強化數值每1") ? "" : "%";
+            opt.textContent = ` ${entry.value}${unit} ➜ ${entry.score} 分`;
+            select.appendChild(opt);
+        });
+
+        // 監聽變動
+        select.addEventListener("change", function() {
+            calcTotalScore();
+            if (this.value && this.value !== "") {
+                card.classList.add("active");
+            } else {
+                card.classList.remove("active");
+            }
+        });
+
+        selectWrapper.appendChild(select);
+        card.appendChild(label);
+        card.appendChild(selectWrapper);
+        container.appendChild(card);
+    });
+
+    // 重置按鈕事件
+    document.getElementById("calcResetBtn").addEventListener("click", () => {
+        document.querySelectorAll(".calc-select").forEach(sel => sel.value = "");
+        document.querySelectorAll(".calc-option-card").forEach(card => card.classList.remove("active"));
+        calcTotalScore();
+    });
+}
+
+/* 計算機計算總分 */
+function calcTotalScore() {
+    let total = 0;
+    document.querySelectorAll(".calc-select").forEach(sel => {
+        total += parseFloat(sel.value || 0);
+    });
+    
+    const totalEl = document.getElementById("calc-total");
+    if (totalEl) {
+        totalEl.textContent = total.toFixed(1);
+    }
 }
 </script>
 </body>
